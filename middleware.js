@@ -1,24 +1,31 @@
-import { getToken } from 'next-auth/jwt';
-import { NextResponse } from 'next/server';
+import { withAuth } from "next-auth/middleware";
+import { NextResponse } from "next/server";
 
-export async function middleware(request) {
-  const token = await getToken({ req: request });
-  
-  // Check if user is trying to access admin routes
-  if (request.nextUrl.pathname.startsWith('/admin')) {
-    // If no token or not an admin, redirect to home
-    if (!token || token.role !== 'ADMIN') {
-      return NextResponse.redirect(new URL('/', request.url));
+export default withAuth(
+  function middleware(req) {
+    const token = req.nextauth.token;
+    const isAdminRoute = req.nextUrl.pathname.startsWith("/admin");
+    const isAdmin = token?.role === "ADMIN";
+
+    if (isAdminRoute && !isAdmin) {
+      return NextResponse.redirect(new URL("/login", req.url));
     }
-    // If admin, allow access to admin routes
+
     return NextResponse.next();
+  },
+  {
+    callbacks: {
+      authorized: ({ token }) => !!token,
+    },
   }
+);
 
-  // Allow normal users and admins to access non-admin routes
-  return NextResponse.next();
-}
-
-// Configure which routes to run middleware on
 export const config = {
-  matcher: ['/admin/:path*']
-}
+  matcher: [
+    "/admin/:path*",
+    "/dashboard/:path*",
+    "/profile/:path*",
+    "/bookings/:path*",
+    "/vehicles/:path*",
+  ],
+};
