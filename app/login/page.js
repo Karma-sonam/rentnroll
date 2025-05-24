@@ -5,7 +5,7 @@ import { useSearchParams } from 'next/navigation';
 import LoginForm from '../../components/LoginForm';
 import RegisterForm from '../../components/RegisterForm';
 
-export default function Login() {
+function LoginContent() {
   const [activeForm, setActiveForm] = useState('login');
   const searchParams = useSearchParams();
 
@@ -19,17 +19,23 @@ export default function Login() {
   return (
     <div id="login-form">
       <div className="container">
-        <Suspense fallback={<div>Loading...</div>}>
-          <div className={`login-container ${activeForm === 'login' ? '' : 'hidden'}`}>
-            <h2>Login</h2>
-            <LoginForm toggleForm={() => setActiveForm('register')} />
-          </div>
-          <div className={`register-container ${activeForm === 'register' ? '' : 'hidden'}`}>
-            <h2>Register</h2>
-            <RegisterForm toggleForm={() => setActiveForm('login')} />
-          </div>
-        </Suspense>
+        <div className={`login-container ${activeForm === 'login' ? '' : 'hidden'}`}>
+          <h2>Login</h2>
+          <LoginForm toggleForm={() => setActiveForm('register')} />
+        </div>
+        <div className={`register-container ${activeForm === 'register' ? '' : 'hidden'}`}>
+          <h2>Register</h2>
+          <RegisterForm toggleForm={() => setActiveForm('login')} />
+        </div>
       </div>
     </div>
+  );
+}
+
+export default function Login() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <LoginContent />
+    </Suspense>
   );
 }
